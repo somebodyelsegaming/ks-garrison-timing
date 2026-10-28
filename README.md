@@ -1,6 +1,7 @@
-# Kingshot Garrison Reinforcement Timing
+# Kingshot Reinforcement Timing
 
-Enter your walk time to the castle you're reinforcing, your best guess of the
+Works for a reinforcement or a solo march at a target you're trying to hold.
+Enter your walk time to the target, your best guess of the
 enemy rally lead's walk time, and how many seconds before (or after) the enemy
 hit you want to land. The page tells you when to send.
 
