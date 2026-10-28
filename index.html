@@ -73,7 +73,7 @@
   </div>
 
   <div class="card hero">
-    <h2>Send your march when</h2>
+    <h2>Your target</h2>
     <div id="o-when" class="big"></div>
     <p id="o-how"></p>
     <p id="o-note" class="warn"></p>
@@ -122,18 +122,18 @@ function update() {
   const note = document.getElementById("o-note");
   note.textContent = "";
   if (r.phase === "countdown") {
-    when.textContent = mmss(r.t) + " on the rally countdown";
-    how.textContent = `Watch the enemy rally gathering timer. Send when it shows ${mmss(r.t)}.`;
+    when.textContent = "Send with " + mmss(r.t) + " left on their rally countdown";
+    how.textContent = "Before their rally marches.";
     if (r.t > 300) note.textContent = "That is longer than a 5-minute rally countdown. Send before the rally even starts, or reinforce from closer.";
   } else if (r.phase === "march") {
-    when.textContent = mmss(r.t) + " left on the enemy march";
-    how.textContent = `Let the rally launch. Send when the enemy march has ${mmss(r.t)} left to arrive.`;
+    when.textContent = "Send with " + mmss(r.t) + " left on their march";
+    how.textContent = "After their rally marches.";
   } else {
-    when.textContent = r.t + "s after the hit";
-    how.textContent = `Wait for the enemy rally to hit, then send ${r.t} seconds later.`;
+    when.textContent = "Send " + r.t + "s after their hit";
+    how.textContent = "";
   }
   document.getElementById("o-how").insertAdjacentText("beforeend",
-    ` You land ${gap}s ${after ? "after" : "before"} the hit.`);
+    ` Aim to land ${gap}s ${after ? "after" : "before"} the hit. There's no clock to sync a send to, and screens and lag add a second or two, so this is a target, not an exact second. Send as close to it as you can.`);
 }
 
 document.querySelectorAll("input").forEach(el => {
