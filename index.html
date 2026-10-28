@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Kingshot - Reinforcement Timing</title>
+<title>Kingshot - Timing Your Reinforcements</title>
 <style>
   :root {
     --bg: #f6f7f9; --card: #ffffff; --text: #1b1f24; --muted: #5b6470;
@@ -39,12 +39,21 @@
   .big { font-size: 2.4rem; font-weight: 700; font-variant-numeric: tabular-nums; margin: 4px 0; }
   .warn { color: var(--warn); font-weight: 600; }
   .small { font-size: .85rem; color: var(--muted); }
+  .steps { display: flex; gap: 6px; margin: 0 0 12px; }
+  .steps span {
+    flex: 1; text-align: center; padding: 6px 4px; border-radius: 6px; font-size: .85rem;
+    font-weight: 600; color: var(--muted); border: 2px dashed var(--line);
+  }
+  .steps span.on { color: #fff; background: var(--c); border: 2px solid var(--c); }
+  .p-countdown { --c: #d97706; } .p-march { --c: #2563eb; } .p-after { --c: #7c3aed; }
+  .hero.p-countdown, .hero.p-march, .hero.p-after { border-color: var(--c); }
+  .watch { display: inline-block; padding: 2px 10px; border-radius: 999px; background: var(--c); color: #fff; font-weight: 700; font-size: .9rem; }
   pre { margin: 0; font-size: .85rem; white-space: pre-wrap; }
 </style>
 </head>
 <body>
 <main>
-  <h1>Kingshot - Reinforcement Timing</h1>
+  <h1>Kingshot - Timing Your Reinforcements</h1>
   <p class="sub">When to send your march (reinforcement or solo) so it lands right before or right after an enemy rally hits.<br>Built by Somebody Else, the gnome you know.</p>
 
   <div class="card">
@@ -52,7 +61,7 @@
     <div class="grid">
       <div>
         <label for="mine">My walk time to the target I'm reinforcing</label>
-        <input id="mine" type="text" inputmode="numeric" autocomplete="off" maxlength="4" value="30">
+        <input id="mine" type="text" inputmode="numeric" autocomplete="off" maxlength="4" value="55">
       </div>
       <div>
         <label for="enemy">Enemy's walk time to that target (best guess)</label>
@@ -72,8 +81,14 @@
     </div>
   </div>
 
-  <div class="card hero">
+  <div id="o-card" class="card hero">
     <h2>Your target</h2>
+    <div class="steps">
+      <span class="p-countdown">1. Their rally countdown</span>
+      <span class="p-march">2. Their march</span>
+      <span class="p-after">3. Their hit</span>
+    </div>
+    <span id="o-watch" class="watch"></span>
     <div id="o-when" class="big"></div>
     <p id="o-how"></p>
     <p id="o-note" class="warn"></p>
@@ -121,13 +136,21 @@ function update() {
   const how = document.getElementById("o-how");
   const note = document.getElementById("o-note");
   note.textContent = "";
+  document.getElementById("o-card").className = "card hero p-" + r.phase;
+  document.querySelectorAll(".steps span").forEach(el =>
+    el.classList.toggle("on", el.classList.contains("p-" + r.phase)));
+  const watch = document.getElementById("o-watch");
+  watch.className = "watch p-" + r.phase;
+  watch.textContent = { countdown: "Watch their RALLY COUNTDOWN (still gathering)",
+                        march: "Watch their MARCH timer (troops on the road)",
+                        after: "Wait for their HIT" }[r.phase];
   if (r.phase === "countdown") {
     when.textContent = "Send with " + mmss(r.t) + " left on their rally countdown";
-    how.textContent = "Before their rally marches.";
+    how.textContent = "Their rally hasn't marched yet.";
     if (r.t > 300) note.textContent = "That is longer than a 5-minute rally countdown. Send before the rally even starts, or reinforce from closer.";
   } else if (r.phase === "march") {
     when.textContent = "Send with " + mmss(r.t) + " left on their march";
-    how.textContent = "After their rally marches.";
+    how.textContent = "Their rally is already marching.";
   } else {
     when.textContent = "Send " + r.t + "s after their hit";
     how.textContent = "";

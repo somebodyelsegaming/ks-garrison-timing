@@ -1,4 +1,4 @@
-# Kingshot Reinforcement Timing
+# Kingshot - Timing Your Reinforcements
 
 Works for a reinforcement or a solo march at a target you're trying to hold.
 Enter your walk time to the target, your best guess of the
