@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kingshot - Garrison Reinforcement Timing</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --card: #ffffff; --text: #1b1f24; --muted: #5b6470;
+    --line: #d9dde3; --accent: #2563eb; --accent-soft: #e8efff; --warn: #b45309;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #111418; --card: #1a1f25; --text: #e6e9ed; --muted: #9aa4b0;
+      --line: #2c333c; --accent: #6b9bff; --accent-soft: #1c2a45; --warn: #f0a646;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 16px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  main { max-width: 760px; margin: 0 auto; padding: 24px 16px 48px; }
+  h1 { font-size: 1.4rem; margin: 0 0 4px; }
+  h2 { font-size: 1rem; margin: 0 0 10px; }
+  .sub { color: var(--muted); margin: 0 0 20px; font-size: .9rem; }
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+    padding: 16px; margin-bottom: 16px;
+  }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; align-items: end; }
+  @media (max-width: 520px) { .grid { grid-template-columns: 1fr; } }
+  label { display: block; font-weight: 600; font-size: .9rem; margin-bottom: 4px; }
+  select, input {
+    width: 100%; padding: 8px; font: inherit; color: var(--text);
+    background: var(--bg); border: 1px solid var(--line); border-radius: 6px;
+  }
+  .hero { background: var(--accent-soft); border: 2px solid var(--accent); }
+  .big { font-size: 2.4rem; font-weight: 700; font-variant-numeric: tabular-nums; margin: 4px 0; }
+  .warn { color: var(--warn); font-weight: 600; }
+  .small { font-size: .85rem; color: var(--muted); }
+  pre { margin: 0; font-size: .85rem; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Kingshot - Garrison Reinforcement Timing</h1>
+  <p class="sub">When to send your reinforcement so it lands right before (or right after) an enemy rally hits.<br>Built by Somebody Else, the gnome you know.</p>
+
+  <div class="card">
+    <h2>Walk times (seconds, as the game shows them)</h2>
+    <div class="grid">
+      <div>
+        <label for="mine">My walk time to the castle I'm reinforcing</label>
+        <input id="mine" type="text" inputmode="numeric" autocomplete="off" maxlength="4" value="30">
+      </div>
+      <div>
+        <label for="enemy">Enemy rally lead's walk time to that castle (best guess)</label>
+        <input id="enemy" type="text" inputmode="numeric" autocomplete="off" maxlength="4" value="36">
+      </div>
+      <div>
+        <label for="gap">Land this many seconds</label>
+        <input id="gap" type="text" inputmode="numeric" autocomplete="off" maxlength="3" value="3">
+      </div>
+      <div>
+        <label for="side">&nbsp;</label>
+        <select id="side">
+          <option value="before" selected>before the enemy hits</option>
+          <option value="after">after the enemy hits</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="card hero">
+    <h2>Send your reinforcement when</h2>
+    <div id="o-when" class="big"></div>
+    <p id="o-how"></p>
+    <p id="o-note" class="warn"></p>
+  </div>
+
+  <div class="card">
+    <h2>How it works</h2>
+    <pre>enemy hits  = rally countdown + enemy walk time
+I land      = when I send + my walk time
+
+send when the rally countdown shows:
+  land before:  my walk − enemy walk + gap
+  land after:   my walk − enemy walk − gap
+
+If that is below 0:00, the rally has already marched. Send when the
+enemy march shows this many seconds left:
+  land before:  my walk + gap
+  land after:   my walk − gap</pre>
+    <p class="small">Walk times change with pets and buffs. Read yours in game with the same buffs you will have on. Whole-second times can be off by up to a second each, so a gap of 2-3 seconds is safer than 0.</p>
+  </div>
+</main>
+
+<script>
+// d = seconds after the enemy hit that I want to land (negative = before).
+// Countdown value to send at: c = mine - enemy - d.
+// If c < 0, the rally has launched; the enemy march then has (mine - d) seconds left.
+// If that is also below 0, send (d - mine) seconds after the hit.
+function calc(mine, enemy, d) {
+  const c = mine - enemy - d;
+  if (c >= 0) return { phase: "countdown", t: c };
+  if (mine - d >= 0) return { phase: "march", t: mine - d };
+  return { phase: "after", t: d - mine };
+}
+
+const mmss = s => Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+const whole = v => Number(String(v).replace(/\D/g, "")) || 0;
+const num = id => whole(document.getElementById(id).value);
+
+function update() {
+  const mine = num("mine"), enemy = num("enemy"), gap = num("gap");
+  const after = document.getElementById("side").value === "after";
+  const d = after ? gap : -gap;
+  const r = calc(mine, enemy, d);
+  const when = document.getElementById("o-when");
+  const how = document.getElementById("o-how");
+  const note = document.getElementById("o-note");
+  note.textContent = "";
+  if (r.phase === "countdown") {
+    when.textContent = mmss(r.t) + " on the rally countdown";
+    how.textContent = `Watch the enemy rally gathering timer. Send when it shows ${mmss(r.t)}.`;
+    if (r.t > 300) note.textContent = "That is longer than a 5-minute rally countdown. Send before the rally even starts, or reinforce from closer.";
+  } else if (r.phase === "march") {
+    when.textContent = mmss(r.t) + " left on the enemy march";
+    how.textContent = `Let the rally launch. Send when the enemy march has ${mmss(r.t)} left to arrive.`;
+  } else {
+    when.textContent = r.t + "s after the hit";
+    how.textContent = `Wait for the enemy rally to hit, then send ${r.t} seconds later.`;
+  }
+  document.getElementById("o-how").insertAdjacentText("beforeend",
+    ` You land ${gap}s ${after ? "after" : "before"} the hit.`);
+}
+
+document.querySelectorAll("input").forEach(el => {
+  el.addEventListener("input", () => {
+    if (!/\D/.test(el.value)) return;
+    const pos = el.selectionStart - (el.value.slice(0, el.selectionStart).match(/\D/g) || []).length;
+    el.value = el.value.replace(/\D/g, "");
+    el.setSelectionRange(pos, pos);
+  });
+  let justFocused = false;
+  el.addEventListener("focus", () => { el.select(); justFocused = true; });
+  el.addEventListener("mouseup", e => { if (justFocused) e.preventDefault(); justFocused = false; });
+  el.addEventListener("change", () => { el.value = whole(el.value); update(); });
+});
+document.getElementById("side").addEventListener("change", update);
+update();
+</script>
+</body>
+</html>
