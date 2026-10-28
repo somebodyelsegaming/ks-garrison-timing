@@ -51,22 +51,22 @@
     <h2>Walk times (seconds, as the game shows them)</h2>
     <div class="grid">
       <div>
-        <label for="mine">My walk time to the castle I'm reinforcing</label>
+        <label for="mine">My walk time to the target I'm reinforcing</label>
         <input id="mine" type="text" inputmode="numeric" autocomplete="off" maxlength="4" value="30">
       </div>
       <div>
-        <label for="enemy">Enemy rally lead's walk time to that castle (best guess)</label>
-        <input id="enemy" type="text" inputmode="numeric" autocomplete="off" maxlength="4" value="36">
+        <label for="enemy">Enemy's walk time to that target (best guess)</label>
+        <input id="enemy" type="text" inputmode="numeric" autocomplete="off" maxlength="4" value="30">
       </div>
       <div>
         <label for="gap">Land this many seconds</label>
-        <input id="gap" type="text" inputmode="numeric" autocomplete="off" maxlength="3" value="3">
+        <input id="gap" type="text" inputmode="numeric" autocomplete="off" maxlength="3" value="1">
       </div>
       <div>
         <label for="side">&nbsp;</label>
         <select id="side">
-          <option value="before" selected>before the enemy hits</option>
-          <option value="after">after the enemy hits</option>
+          <option value="after" selected>after the enemy hits</option>
+          <option value="before">before the enemy hits</option>
         </select>
       </div>
     </div>
