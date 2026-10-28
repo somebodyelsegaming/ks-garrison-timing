@@ -84,7 +84,7 @@
   <div id="o-card" class="card hero">
     <h2>Your target</h2>
     <div class="steps">
-      <span class="p-countdown">1. Their rally countdown</span>
+      <span class="p-countdown">1. Their rally timer countdown</span>
       <span class="p-march">2. Their march</span>
       <span class="p-after">3. Their hit</span>
     </div>
@@ -141,11 +141,11 @@ function update() {
     el.classList.toggle("on", el.classList.contains("p-" + r.phase)));
   const watch = document.getElementById("o-watch");
   watch.className = "watch p-" + r.phase;
-  watch.textContent = { countdown: "Watch their RALLY COUNTDOWN (still gathering)",
+  watch.textContent = { countdown: "Watch their RALLY TIMER COUNTDOWN",
                         march: "Watch their MARCH timer (troops on the road)",
                         after: "Wait for their HIT" }[r.phase];
   if (r.phase === "countdown") {
-    when.textContent = "Send with " + mmss(r.t) + " left on their rally countdown";
+    when.textContent = "Send with " + mmss(r.t) + " left on their rally timer countdown";
     how.textContent = "Their rally hasn't marched yet.";
     if (r.t > 300) note.textContent = "That is longer than a 5-minute rally countdown. Send before the rally even starts, or reinforce from closer.";
   } else if (r.phase === "march") {
